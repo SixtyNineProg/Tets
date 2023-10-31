@@ -1,58 +1,129 @@
 package ru.clevertec.product.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import ru.clevertec.product.data.ProductDto;
-import ru.clevertec.product.mapper.ProductMapper;
-import ru.clevertec.product.repository.ProductRepository;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import ru.clevertec.product.data.InfoProductDto;
+import ru.clevertec.product.data.ProductDto;
+import ru.clevertec.product.entity.Product;
+import ru.clevertec.product.exception.ProductNotFoundException;
+import ru.clevertec.product.mapper.ProductMapper;
+import ru.clevertec.product.repository.ProductRepository;
+import ru.clevertec.product.util.ProductTestData;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
 
-    @Mock
-    private ProductMapper mockMapper;
-    @Mock
-    private ProductRepository mockProductRepository;
+  @Mock private ProductMapper mapper;
+  @Mock private ProductRepository productRepository;
 
-    private ProductServiceImpl productServiceImplUnderTest;
+  @InjectMocks private ProductServiceImpl productServiceImpl;
 
-    @BeforeEach
-    void setUp() {
-        productServiceImplUnderTest = new ProductServiceImpl(mockMapper, mockProductRepository);
-    }
+  @Test
+  void testGet_getByUuid_productExpected() {
+    // given
+    ProductTestData expected = setUpGet();
 
-    @Test
-    void testGet() {
-        assertThat(productServiceImplUnderTest.get(UUID.fromString("f02052f4-4c9e-4f09-85db-178f65551547"))).isNull();
-    }
+    // when
+    InfoProductDto actual = productServiceImpl.get(expected.getUuid());
 
-    @Test
-    void testGetAll() {
-        assertThat(productServiceImplUnderTest.getAll()).isNull();
-    }
+    // then
+    assertThat(actual)
+        .hasFieldOrPropertyWithValue(Product.Fields.uuid, expected.getUuid())
+        .hasFieldOrPropertyWithValue(Product.Fields.name, expected.getName())
+        .hasFieldOrPropertyWithValue(Product.Fields.created, expected.getCreated())
+        .hasFieldOrPropertyWithValue(Product.Fields.price, expected.getPrice())
+        .hasFieldOrPropertyWithValue(Product.Fields.description, expected.getDescription());
+  }
 
-    @Test
-    void testCreate() {
-        assertThat(productServiceImplUnderTest.create(
-                new ProductDto("name", "description", new BigDecimal("0.00")))).isNull();
-    }
+  @Test
+  void testGet_getByUuid_callOneTimeRepositoryFindByExpected() {
+    // given
+    ProductTestData expected = setUpGet();
 
-    @Test
-    void testUpdate() {
-        productServiceImplUnderTest.update(UUID.fromString("2e7f58f2-d0b4-4314-8b4e-58f014e2be71"),
-                new ProductDto("name", "description", new BigDecimal("0.00")));
-    }
+    // when
+    productServiceImpl.get(expected.getUuid());
 
-    @Test
-    void testDelete() {
-        productServiceImplUnderTest.delete(UUID.fromString("b68f32bc-25de-4c96-b2e4-965761de2b31"));
-    }
+    // then
+    verify(productRepository).findById(expected.getUuid());
+  }
+
+  @Test
+  void testGet_getByUnknownUuid_productNotFoundExceptionExpected() {
+    // given
+    UUID uuid = UUID.fromString("197ceff8-27a8-4b31-a019-5069ea80ab5b");
+    Mockito.doReturn(Optional.empty()).when(productRepository).findById(uuid);
+
+    // when
+    ProductNotFoundException thrown =
+        Assertions.assertThrows(ProductNotFoundException.class, () -> productServiceImpl.get(uuid));
+
+    // then
+    assertThat(thrown).hasMessage(String.format("Product with uuid: %s not found", uuid));
+  }
+
+  @Test
+  void testGetAll() {
+    assertThat(productServiceImpl.getAll()).isNull();
+  }
+
+  @Test
+  void testCreate() {
+    assertThat(
+            productServiceImpl.create(
+                new ProductDto("name", "description", new BigDecimal("0.00"))))
+        .isNull();
+  }
+
+  @Test
+  void testUpdate() {
+    productServiceImpl.update(
+        UUID.fromString("2e7f58f2-d0b4-4314-8b4e-58f014e2be71"),
+        new ProductDto("name", "description", new BigDecimal("0.00")));
+  }
+
+  @Test
+  void testDelete() {
+    productServiceImpl.delete(UUID.fromString("b68f32bc-25de-4c96-b2e4-965761de2b31"));
+  }
+
+  private ProductTestData setUpGet() {
+    ProductTestData expected = ProductTestData.builder().build();
+    Optional<Product> productRepositoryTestData =
+            Optional.ofNullable(
+                    Product.builder()
+                            .uuid(expected.getUuid())
+                            .created(expected.getCreated())
+                            .description(expected.getDescription())
+                            .price(BigDecimal.valueOf(100))
+                            .build());
+    InfoProductDto productMapperTestData =
+            InfoProductDto.builder()
+                    .uuid(expected.getUuid())
+                    .name(expected.getName())
+                    .description(expected.getDescription())
+                    .price(BigDecimal.valueOf(100))
+                    .build();
+    initMocksForGet(productRepositoryTestData, expected, productMapperTestData);
+    return expected;
+  }
+
+  private void initMocksForGet(Optional<Product> productRepositoryTestData, ProductTestData expected, InfoProductDto productMapperTestData) {
+    Mockito.doReturn(productRepositoryTestData)
+            .when(productRepository)
+            .findById(expected.getUuid());
+    Mockito.doReturn(productMapperTestData)
+            .when(mapper)
+            .toInfoProductDto(productRepositoryTestData.orElseThrow());
+  }
 }
