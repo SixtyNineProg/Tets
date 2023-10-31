@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -27,10 +29,12 @@ class ProductServiceImplTest {
   @Mock private ProductMapper mapper;
   @Mock private ProductRepository productRepository;
 
+  @Captor private ArgumentCaptor<UUID> uuidArgumentCaptor;
+
   @InjectMocks private ProductServiceImpl productServiceImpl;
 
   @Test
-  void testGet_getByUuid_productExpected() {
+  void testGet_whenGetByUuid_thanProductExpected() {
     // given
     ProductTestData expected = setUpGet();
 
@@ -47,7 +51,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testGet_getByUuid_callOneTimeRepositoryFindByExpected() {
+  void testGet_whenGetByUuid_thanCallOneTimeRepositoryFindByExpected() {
     // given
     ProductTestData expected = setUpGet();
 
@@ -59,7 +63,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testGet_getByUnknownUuid_productNotFoundExceptionExpected() {
+  void testGet_whenGetByUnknownUuid_thanProductNotFoundExceptionExpected() {
     // given
     UUID uuid = UUID.fromString("197ceff8-27a8-4b31-a019-5069ea80ab5b");
     Mockito.doReturn(Optional.empty()).when(productRepository).findById(uuid);
@@ -70,6 +74,20 @@ class ProductServiceImplTest {
 
     // then
     assertThat(thrown).hasMessage(String.format("Product with uuid: %s not found", uuid));
+  }
+
+  @Test
+  void testGet_whenGetByUuid_thanCallRepositoryWithThisUuid() {
+    // given
+    ProductTestData expected = setUpGet();
+
+    // when
+    productServiceImpl.get(expected.getUuid());
+
+    // then
+    verify(productRepository).findById(uuidArgumentCaptor.capture());
+    System.out.println(uuidArgumentCaptor.getValue());
+    assertThat(uuidArgumentCaptor.getValue()).isEqualByComparingTo(expected.getUuid());
   }
 
   @Test
@@ -99,31 +117,22 @@ class ProductServiceImplTest {
 
   private ProductTestData setUpGet() {
     ProductTestData expected = ProductTestData.builder().build();
-    Optional<Product> productRepositoryTestData =
-            Optional.ofNullable(
-                    Product.builder()
-                            .uuid(expected.getUuid())
-                            .created(expected.getCreated())
-                            .description(expected.getDescription())
-                            .price(BigDecimal.valueOf(100))
-                            .build());
-    InfoProductDto productMapperTestData =
-            InfoProductDto.builder()
-                    .uuid(expected.getUuid())
-                    .name(expected.getName())
-                    .description(expected.getDescription())
-                    .price(BigDecimal.valueOf(100))
-                    .build();
+    Product productRepositoryTestData = ProductTestData.builder().build().buildProduct();
+    InfoProductDto productMapperTestData = ProductTestData.builder().build().buildInfoProductDto();
     initMocksForGet(productRepositoryTestData, expected, productMapperTestData);
     return expected;
   }
 
-  private void initMocksForGet(Optional<Product> productRepositoryTestData, ProductTestData expected, InfoProductDto productMapperTestData) {
-    Mockito.doReturn(productRepositoryTestData)
-            .when(productRepository)
-            .findById(expected.getUuid());
+  private void initMocksForGet(
+      Product productRepositoryTestData,
+      ProductTestData expected,
+      InfoProductDto productMapperTestData) {
+    Optional<Product> optionalProductRepository = Optional.ofNullable(productRepositoryTestData);
+    Mockito.doReturn(optionalProductRepository)
+        .when(productRepository)
+        .findById(expected.getUuid());
     Mockito.doReturn(productMapperTestData)
-            .when(mapper)
-            .toInfoProductDto(productRepositoryTestData.orElseThrow());
+        .when(mapper)
+        .toInfoProductDto(optionalProductRepository.orElseThrow());
   }
 }
