@@ -1,8 +1,11 @@
 package ru.clevertec.product.data;
 
+import lombok.Builder;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
+@Builder
 public record InfoProductDto(
 
         /**
