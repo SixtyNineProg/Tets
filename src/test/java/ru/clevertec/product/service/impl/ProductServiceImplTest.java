@@ -1,9 +1,10 @@
 package ru.clevertec.product.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.floatThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +32,7 @@ class ProductServiceImplTest {
   @Mock private ProductRepository productRepository;
 
   @Captor private ArgumentCaptor<UUID> uuidArgumentCaptor;
+  @Captor private ArgumentCaptor<Product> productArgumentCaptor;
 
   @InjectMocks private ProductServiceImpl productServiceImpl;
 
@@ -66,7 +68,7 @@ class ProductServiceImplTest {
   @Test
   void testGet_whenGetByUnknownUuid_thanProductNotFoundExceptionExpected() {
     // given
-    UUID uuid = UUID.fromString("197ceff8-27a8-4b31-a019-5069ea80ab5b");
+    UUID uuid = ProductTestData.builder().build().getUuid();
     Mockito.doReturn(Optional.empty()).when(productRepository).findById(uuid);
 
     // when
@@ -115,31 +117,113 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testCreate() {
-    assertThat(
-            productServiceImpl.create(
-                new ProductDto("name", "description", new BigDecimal("0.00"))))
-        .isNull();
+  void testCreate_whenCreate_theUuidExpected() {
+    // given
+    ProductDto productDto = setUpCreate();
+    UUID expected = ProductTestData.builder().build().getUuid();
+
+    // when
+    UUID actual = productServiceImpl.create(productDto);
+
+    // then
+    assertThat(actual).isEqualByComparingTo(expected);
   }
 
   @Test
-  void testUpdate() {
-    productServiceImpl.update(
-        UUID.fromString("2e7f58f2-d0b4-4314-8b4e-58f014e2be71"),
-        new ProductDto("name", "description", new BigDecimal("0.00")));
+  void testCreate_whenCreate_thanCallRepositoryWithExpectedProduct() {
+    // given
+    ProductDto expected = setUpCreate();
+
+    // when
+    productServiceImpl.create(expected);
+
+    // then
+    verify(productRepository).save(productArgumentCaptor.capture());
+    assertThat(uuidArgumentCaptor.getValue())
+        .hasFieldOrPropertyWithValue(Product.Fields.name, expected.name())
+        .hasFieldOrPropertyWithValue(Product.Fields.price, expected.price())
+        .hasFieldOrPropertyWithValue(Product.Fields.description, expected.description());
   }
 
   @Test
-  void testDelete() {
-    productServiceImpl.delete(UUID.fromString("b68f32bc-25de-4c96-b2e4-965761de2b31"));
+  void testUpdate_whenUpdate_thanCallRepositorySaveWithExpectedProduct() {
+    // given
+    ProductDto expected = setUpUpdate();
+    UUID uuid = ProductTestData.builder().build().getUuid();
+
+    // when
+    productServiceImpl.update(uuid, expected);
+
+    // then
+    verify(productRepository).save(productArgumentCaptor.capture());
+    assertThat(uuidArgumentCaptor.getValue())
+        .hasFieldOrPropertyWithValue(Product.Fields.uuid, uuid)
+        .hasFieldOrPropertyWithValue(Product.Fields.name, expected.name())
+        .hasFieldOrPropertyWithValue(Product.Fields.price, expected.price())
+        .hasFieldOrPropertyWithValue(Product.Fields.description, expected.description());
+  }
+
+  @Test
+  void testDelete_whenDelete_thanCallRepositoryDeleteWithThisUuid() {
+    // given
+    UUID uuid = ProductTestData.builder().build().getUuid();
+    Mockito.doNothing().when(productRepository).delete(uuid);
+
+    // when
+    productServiceImpl.delete(uuid);
+
+    // then
+    verify(productRepository).delete(uuidArgumentCaptor.capture());
+    assertThat(uuidArgumentCaptor.getValue()).isEqualByComparingTo(uuid);
+  }
+
+  private ProductDto setUpUpdate() {
+    ProductDto productDto = ProductTestData.builder().build().buildProductDto();
+    Product product = ProductTestData.builder().build().buildProduct();
+    UUID uuid = product.getUuid();
+    initMocksForUpdate(product, productDto, uuid);
+    return productDto;
+  }
+
+  private void initMocksForUpdate(Product product, ProductDto productDto, UUID uuid) {
+    Optional<Product> optionalProduct = Optional.ofNullable(product);
+    Mockito.doReturn(product).when(mapper).toProduct(productDto);
+    Mockito.doReturn(optionalProduct).when(productRepository).findById(uuid);
+    Mockito.doReturn(product).when(productRepository).save(product);
+  }
+
+  private ProductDto setUpCreate() {
+    ProductDto productDto = ProductTestData.builder().build().buildProductDto();
+    Product product = ProductTestData.builder().build().buildProduct();
+    InfoProductDto productMapperTestData = ProductTestData.builder().build().buildInfoProductDto();
+    initMocksForCreate(product, productDto, productMapperTestData);
+    return productDto;
+  }
+
+  private void initMocksForCreate(
+      Product product, ProductDto productDto, InfoProductDto productMapperTestData) {
+    Mockito.doReturn(product).when(mapper).toProduct(productDto);
+    Mockito.doReturn(product).when(productRepository).save(product);
+    Mockito.doReturn(productMapperTestData).when(mapper).toInfoProductDto(product);
   }
 
   private ProductTestData setUpGet() {
     ProductTestData expected = ProductTestData.builder().build();
-    Product productRepositoryTestData = ProductTestData.builder().build().buildProduct();
+    Product product = ProductTestData.builder().build().buildProduct();
     InfoProductDto productMapperTestData = ProductTestData.builder().build().buildInfoProductDto();
-    initMocksForGet(productRepositoryTestData, expected, productMapperTestData);
+    initMocksForGet(product, expected, productMapperTestData);
     return expected;
+  }
+
+  private void initMocksForGet(
+      Product product, ProductTestData expected, InfoProductDto productMapperTestData) {
+    Optional<Product> optionalProductRepository = Optional.ofNullable(product);
+    Mockito.doReturn(optionalProductRepository)
+        .when(productRepository)
+        .findById(expected.getUuid());
+    Mockito.doReturn(productMapperTestData)
+        .when(mapper)
+        .toInfoProductDto(optionalProductRepository.orElseThrow());
   }
 
   private void setUpGetAll() {
@@ -149,24 +233,11 @@ class ProductServiceImplTest {
     initMocksForGetAll(productRepositoryTestData, listInfoProductDto);
   }
 
-  private void initMocksForGet(
-      Product productRepositoryTestData,
-      ProductTestData expected,
-      InfoProductDto productMapperTestData) {
-    Optional<Product> optionalProductRepository = Optional.ofNullable(productRepositoryTestData);
-    Mockito.doReturn(optionalProductRepository)
-        .when(productRepository)
-        .findById(expected.getUuid());
-    Mockito.doReturn(productMapperTestData)
-        .when(mapper)
-        .toInfoProductDto(optionalProductRepository.orElseThrow());
-  }
-
   private void initMocksForGetAll(
-          List<Product> productRepositoryTestData, List<InfoProductDto> listInfoProductDto) {
+      List<Product> productRepositoryTestData, List<InfoProductDto> listInfoProductDto) {
     Mockito.doReturn(productRepositoryTestData).when(productRepository).findAll();
     Mockito.doReturn(listInfoProductDto)
-            .when(mapper)
-            .toListInfoProductDto(productRepositoryTestData);
+        .when(mapper)
+        .toListInfoProductDto(productRepositoryTestData);
   }
 }

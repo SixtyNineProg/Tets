@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import ru.clevertec.product.data.InfoProductDto;
+import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
 
 @Data
@@ -31,7 +32,7 @@ public class ProductTestData {
         .uuid(uuid)
         .name(name)
         .description(description)
-        .price(BigDecimal.valueOf(100))
+        .price(price)
         .build();
   }
 
@@ -40,8 +41,16 @@ public class ProductTestData {
         .uuid(uuid)
         .created(created)
         .description(description)
-        .price(BigDecimal.valueOf(1000))
+        .price(price)
         .build();
+  }
+
+  public ProductDto buildProductDto() {
+    return ProductDto.builder()
+            .name(name)
+            .description(description)
+            .price(price)
+            .build();
   }
 
   public List<InfoProductDto> buildListInfoProductDto() {
