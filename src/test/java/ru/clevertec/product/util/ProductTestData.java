@@ -2,6 +2,8 @@ package ru.clevertec.product.util;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
@@ -40,5 +42,13 @@ public class ProductTestData {
         .description(description)
         .price(BigDecimal.valueOf(1000))
         .build();
+  }
+
+  public List<InfoProductDto> buildListInfoProductDto() {
+    return Collections.singletonList(buildInfoProductDto());
+  }
+
+  public List<Product> buildListProducts() {
+    return Collections.singletonList(buildProduct());
   }
 }

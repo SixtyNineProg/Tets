@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -86,13 +87,31 @@ class ProductServiceImplTest {
 
     // then
     verify(productRepository).findById(uuidArgumentCaptor.capture());
-    System.out.println(uuidArgumentCaptor.getValue());
     assertThat(uuidArgumentCaptor.getValue()).isEqualByComparingTo(expected.getUuid());
   }
 
   @Test
-  void testGetAll() {
-    assertThat(productServiceImpl.getAll()).isNull();
+  void testGetAll_whenGetAll_thanGetNonEmptyList() {
+    // given
+    setUpGetAll();
+
+    // when
+    List<InfoProductDto> actual = productServiceImpl.getAll();
+
+    // then
+    assertThat(actual).isNotEmpty();
+  }
+
+  @Test
+  void testGetAll_whenGetByUuid_thanCallOneTimeRepositoryFindAllExpected() {
+    // given
+    setUpGetAll();
+
+    // when
+    productServiceImpl.getAll();
+
+    // then
+    verify(productRepository).findAll();
   }
 
   @Test
@@ -123,6 +142,13 @@ class ProductServiceImplTest {
     return expected;
   }
 
+  private void setUpGetAll() {
+    List<InfoProductDto> listInfoProductDto =
+        ProductTestData.builder().build().buildListInfoProductDto();
+    List<Product> productRepositoryTestData = ProductTestData.builder().build().buildListProducts();
+    initMocksForGetAll(productRepositoryTestData, listInfoProductDto);
+  }
+
   private void initMocksForGet(
       Product productRepositoryTestData,
       ProductTestData expected,
@@ -134,5 +160,13 @@ class ProductServiceImplTest {
     Mockito.doReturn(productMapperTestData)
         .when(mapper)
         .toInfoProductDto(optionalProductRepository.orElseThrow());
+  }
+
+  private void initMocksForGetAll(
+          List<Product> productRepositoryTestData, List<InfoProductDto> listInfoProductDto) {
+    Mockito.doReturn(productRepositoryTestData).when(productRepository).findAll();
+    Mockito.doReturn(listInfoProductDto)
+            .when(mapper)
+            .toListInfoProductDto(productRepositoryTestData);
   }
 }
