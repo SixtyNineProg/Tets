@@ -1,17 +1,14 @@
 package util;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 @Data
 @Builder(setterPrefix = "with", toBuilder = true)
@@ -40,6 +37,7 @@ public class ProductTestData {
   public Product buildProduct() {
     return Product.builder()
         .uuid(uuid)
+        .name(name)
         .created(created)
         .description(description)
         .price(price)
@@ -48,13 +46,5 @@ public class ProductTestData {
 
   public ProductDto buildProductDto() {
     return ProductDto.builder().name(name).description(description).price(price).build();
-  }
-
-  public List<InfoProductDto> buildListInfoProductDto() {
-    return Collections.singletonList(buildInfoProductDto());
-  }
-
-  public List<Product> buildListProducts() {
-    return Collections.singletonList(buildProduct());
   }
 }

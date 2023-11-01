@@ -1,82 +1,37 @@
 package ru.clevertec.product.mapper.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import util.ProductArgumentsProviderToProduct;
 
 class ProductMapperImplTest {
 
-  private ProductMapperImpl productMapper;
-
-  private static Stream<Arguments> provideEmailArguments() {
-    return Stream.of(
-        Arguments.of(
-            "Kuzmich Vladislav <v.kuzmich@invento-labs.com>", "v.kuzmich@invento-labs.com"),
-        Arguments.of("r.rantsevich@atevisystems.com", "r.rantsevich@atevisystems.com"));
-  }
+  private final ProductMapperImpl productMapper = new ProductMapperImpl();
 
   @ParameterizedTest
-  @MethodSource("provideEmailArguments")
-  void testGetContent_ValidStringWithEmail_EmailExtracted(String input, String expectedEmail) {
+  @ArgumentsSource(ProductArgumentsProviderToProduct.class)
+  void testToProduct(ProductDto productDto, Product expected) {
     // Given
-    // input and expectedEmail are provided by the MethodSource
+    // ProductDto and expected Product are provided by the MethodSource
 
     // When
-    Optional<String> extractedEmail = ParseUtils.getContent(input, REGEX_EMAIL_FROM_ADDRESS);
+    Product actual = productMapper.toProduct(productDto);
 
     // Then
-    assertTrue(extractedEmail.isPresent(), "Email should be extracted");
-    assertEquals(
-        expectedEmail, extractedEmail.get(), "Extracted email should match expected email");
-  }
-
-  private static Stream<Arguments> provideLoginArguments() {
-    return Stream.of(
-        Arguments.of("[Reset][L.Sjoberg]", "L.Sjoberg"),
-        Arguments.of("[Reset][L.Sjoberg] >", "L.Sjoberg"));
-  }
-
-  @ParameterizedTest
-  @MethodSource("provideLoginArguments")
-  void testGetContent_ValidStringWithLogin_LoginExtracted(String input, String expectedLogin) {
-    // Given
-    // input and expectedLogin are provided by the MethodSource
-
-    // When
-    Optional<String> extractedLogin =
-        ParseUtils.getContent(input, REGEX_GET_LOGIN, NUM_GROUP_GET_LOGIN);
-
-    // Then
-    assertTrue(extractedLogin.isPresent(), "Login should be extracted");
-    assertEquals(
-        expectedLogin, extractedLogin.get(), "Extracted login should match expected login");
-  }
-
-  private static Stream<Arguments> provideEmailArguments() {
-    return Stream.of(
-        Arguments.of(
-            "Kuzmich Vladislav <v.kuzmich@invento-labs.com>", "v.kuzmich@invento-labs.com"),
-        Arguments.of("r.rantsevich@atevisystems.com", "r.rantsevich@atevisystems.com"));
-  }
-
-  @Test
-  void testToProduct() {
-    assertThat(productMapper.toProduct(ProductDto.builder().build())).isNull();
+    assertThat(actual)
+        .hasFieldOrPropertyWithValue(Product.Fields.name, expected.getName())
+        .hasFieldOrPropertyWithValue(Product.Fields.description, expected.getDescription())
+        .hasFieldOrPropertyWithValue(Product.Fields.price, expected.getPrice());
   }
 
   @Test
   void testToInfoProductDto() {
     assertThat(productMapper.toInfoProductDto(Product.builder().build())).isNull();
-  }
-
-  @Test
-  void testToListInfoProductDto() {
-    assertThat(productMapper.toListInfoProductDto(List.of(Product.builder().build()))).isNull();
   }
 
   @Test
