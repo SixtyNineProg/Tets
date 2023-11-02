@@ -1,11 +1,10 @@
 package ru.clevertec.product.repository.impl;
 
-import ru.clevertec.product.entity.Product;
-import ru.clevertec.product.repository.ProductRepository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import ru.clevertec.product.entity.Product;
+import ru.clevertec.product.repository.ProductRepository;
 
 public class InMemoryProductRepository implements ProductRepository {
 
