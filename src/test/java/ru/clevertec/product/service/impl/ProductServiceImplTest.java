@@ -35,7 +35,7 @@ class ProductServiceImplTest {
   @InjectMocks private ProductServiceImpl productServiceImpl;
 
   @Test
-  void testGet_whenGetByUuid_thanProductExpected() {
+  void testGet_whenGetByUuid_thenProductExpected() {
     // given
     ProductTestData expected = setUpGet();
 
@@ -52,7 +52,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testGet_whenGetByUuid_thanCallOneTimeRepositoryFindByExpected() {
+  void testGet_whenGetByUuid_thenCallOneTimeRepositoryFindByExpected() {
     // given
     ProductTestData expected = setUpGet();
 
@@ -64,7 +64,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testGet_whenGetByUnknownUuid_thanProductNotFoundExceptionExpected() {
+  void testGet_whenGetByUnknownUuid_thenProductNotFoundExceptionExpected() {
     // given
     UUID uuid = ProductTestData.builder().build().getUuid();
     Mockito.doReturn(Optional.empty()).when(productRepository).findById(uuid);
@@ -78,7 +78,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testGet_whenGetByUuid_thanCallRepositoryWithThisUuid() {
+  void testGet_whenGetByUuid_thenCallRepositoryWithThisUuid() {
     // given
     ProductTestData expected = setUpGet();
 
@@ -91,7 +91,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testGetAll_whenGetAll_thanGetNonEmptyList() {
+  void testGetAll_whenGetAll_thenGetNonEmptyList() {
     // given
     setUpGetAll();
 
@@ -103,7 +103,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testGetAll_whenGetByUuid_thanCallOneTimeRepositoryFindAllExpected() {
+  void testGetAll_whenGetByUuid_thenCallOneTimeRepositoryFindAllExpected() {
     // given
     setUpGetAll();
 
@@ -128,7 +128,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testCreate_whenCreate_thanCallRepositoryWithExpectedProduct() {
+  void testCreate_whenCreate_thenCallRepositoryWithExpectedProduct() {
     // given
     ProductDto expected = setUpCreate();
 
@@ -144,7 +144,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testUpdate_whenUpdate_thanCallRepositorySaveWithExpectedProduct() {
+  void testUpdate_whenUpdate_thenCallRepositorySaveWithExpectedProduct() {
     // given
     ProductDto expected = setUpUpdate();
     UUID uuid = ProductTestData.builder().build().getUuid();
@@ -162,7 +162,7 @@ class ProductServiceImplTest {
   }
 
   @Test
-  void testDelete_whenDelete_thanCallRepositoryDeleteWithThisUuid() {
+  void testDelete_whenDelete_thenCallRepositoryDeleteWithThisUuid() {
     // given
     UUID uuid = ProductTestData.builder().build().getUuid();
     Mockito.doNothing().when(productRepository).delete(uuid);

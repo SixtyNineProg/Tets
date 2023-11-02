@@ -37,7 +37,7 @@ class ProductMapperImplTest {
   }
 
   @Test
-  void testToProduct_whenToProductWithNullProductDto_thanProductNotFoundExceptionExpected() {
+  void testToProduct_whenToProductWithNullProductDto_thenProductNotFoundExceptionExpected() {
     // given
     ProductDto productDto = null;
 
@@ -69,7 +69,7 @@ class ProductMapperImplTest {
 
   @Test
   void
-      testToInfoProductDto_whenToInfoProductDtoWithNullProduct_thanProductNotFoundExceptionExpected() {
+      testToInfoProductDto_whenToInfoProductDtoWithNullProduct_thenProductNotFoundExceptionExpected() {
     // given
     Product product = null;
 
@@ -101,7 +101,7 @@ class ProductMapperImplTest {
   }
 
   @Test
-  void testMerge_whenMergeWithNullProduct_thanProductNotFoundExceptionExpected() {
+  void testMerge_whenMergeWithNullProduct_thenProductNotFoundExceptionExpected() {
     // given
     Product product = null;
     ProductDto productDto = ProductTestData.builder().build().buildProductDto();
