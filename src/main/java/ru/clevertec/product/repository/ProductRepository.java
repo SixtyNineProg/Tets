@@ -1,10 +1,9 @@
 package ru.clevertec.product.repository;
 
-import ru.clevertec.product.entity.Product;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import ru.clevertec.product.entity.Product;
 
 public interface ProductRepository {
 
