@@ -17,28 +17,20 @@ import java.util.UUID;
 @FieldNameConstants
 public class Product {
 
-    /**
-     * Идентификатор продукта (генерируется базой)
-     */
-    private UUID uuid;
+  /** Идентификатор продукта (генерируется базой) */
+  private UUID uuid;
 
-    /**
-     * Название продукта (не может быть null или пустым, содержит 5-10 символов(русский или пробелы))
-     */
-    private String name;
+  /**
+   * Название продукта (не может быть null или пустым, содержит 5-10 символов(русский или пробелы))
+   */
+  private String name;
 
-    /**
-     * Описание продукта(может быть null или 10-30 символов(русский и пробелы))
-     */
-    private String description;
+  /** Описание продукта(может быть null или 10-30 символов(русский и пробелы)) */
+  private String description;
 
-    /**
-     * Не может быть null и должен быть положительным
-     */
-    private BigDecimal price;
+  /** Не может быть null и должен быть положительным */
+  private BigDecimal price;
 
-    /**
-     * Время создания, не может быть null(задаётся до сохранения и не обновляется)
-     */
-    private LocalDateTime created;
+  /** Время создания, не может быть null(задаётся до сохранения и не обновляется) */
+  private LocalDateTime created;
 }

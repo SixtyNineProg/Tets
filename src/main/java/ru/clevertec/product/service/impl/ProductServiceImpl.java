@@ -13,31 +13,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductMapper mapper;
-    private final ProductRepository productRepository;
+  private final ProductMapper mapper;
+  private final ProductRepository productRepository;
 
-    @Override
-    public InfoProductDto get(UUID uuid) {
-        return null;
-    }
+  @Override
+  public InfoProductDto get(UUID uuid) {
+    return null;
+  }
 
-    @Override
-    public List<InfoProductDto> getAll() {
-        return null;
-    }
+  @Override
+  public List<InfoProductDto> getAll() {
+    return null;
+  }
 
-    @Override
-    public UUID create(ProductDto productDto) {
-        return null;
-    }
+  @Override
+  public UUID create(ProductDto productDto) {
+    return null;
+  }
 
-    @Override
-    public void update(UUID uuid, ProductDto productDto) {
+  @Override
+  public void update(UUID uuid, ProductDto productDto) {}
 
-    }
-
-    @Override
-    public void delete(UUID uuid) {
-
-    }
+  @Override
+  public void delete(UUID uuid) {}
 }

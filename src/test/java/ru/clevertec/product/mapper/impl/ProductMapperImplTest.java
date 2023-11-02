@@ -10,6 +10,8 @@ import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
 import ru.clevertec.product.exception.ProductNotFoundException;
+import util.ProductTestData;
+import util.provider.ArgumentsProviderMerge;
 import util.provider.ArgumentsProviderToInfoProductDto;
 import util.provider.ArgumentsProviderToProduct;
 
@@ -79,9 +81,36 @@ class ProductMapperImplTest {
     assertThat(thrown).hasMessage(ProductNotFoundException.DEFAULT_MESSAGE);
   }
 
+  @ParameterizedTest
+  @ArgumentsSource(ArgumentsProviderMerge.class)
+  void testMerge_whenMerge_thenProductExpected(
+      Product product, ProductDto productDto, Product expected) {
+    // Given
+    // Product and expected InfoProductDto are provided by the MethodSource
+
+    // When
+    Product actual = productMapper.merge(product, productDto);
+
+    // Then
+    assertThat(actual)
+        .hasFieldOrPropertyWithValue(Product.Fields.uuid, expected.getUuid())
+        .hasFieldOrPropertyWithValue(Product.Fields.name, expected.getName())
+        .hasFieldOrPropertyWithValue(Product.Fields.description, expected.getDescription())
+        .hasFieldOrPropertyWithValue(Product.Fields.price, expected.getPrice())
+        .hasFieldOrPropertyWithValue(Product.Fields.created, expected.getCreated());
+  }
+
   @Test
-  void testMerge() {
-    assertThat(productMapper.merge(Product.builder().build(), ProductDto.builder().build()))
-        .isNull();
+  void testMerge_whenMergeWithNullProduct_thanProductNotFoundExceptionExpected() {
+    // given
+    Product product = null;
+    ProductDto productDto = ProductTestData.builder().build().buildProductDto();
+
+    // when
+    ProductNotFoundException thrown =
+        Assertions.assertThrows(
+            ProductNotFoundException.class, () -> productMapper.merge(product, productDto));
+    // then
+    assertThat(thrown).hasMessage(ProductNotFoundException.DEFAULT_MESSAGE);
   }
 }

@@ -9,23 +9,21 @@ import java.util.UUID;
 
 public class InMemoryProductRepository implements ProductRepository {
 
-    @Override
-    public Optional<Product> findById(UUID uuid) {
-        return Optional.empty();
-    }
+  @Override
+  public Optional<Product> findById(UUID uuid) {
+    return Optional.empty();
+  }
 
-    @Override
-    public List<Product> findAll() {
-        return null;
-    }
+  @Override
+  public List<Product> findAll() {
+    return null;
+  }
 
-    @Override
-    public Product save(Product product) {
-        return null;
-    }
+  @Override
+  public Product save(Product product) {
+    return null;
+  }
 
-    @Override
-    public void delete(UUID uuid) {
-
-    }
+  @Override
+  public void delete(UUID uuid) {}
 }
