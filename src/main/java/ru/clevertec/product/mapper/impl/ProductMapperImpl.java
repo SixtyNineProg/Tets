@@ -9,23 +9,23 @@ import java.util.List;
 
 public class ProductMapperImpl implements ProductMapper {
 
-    @Override
-    public Product toProduct(ProductDto productDto) {
-        return null;
-    }
+  @Override
+  public Product toProduct(ProductDto productDto) {
+    return null;
+  }
 
-    @Override
-    public InfoProductDto toInfoProductDto(Product product) {
-        return null;
-    }
+  @Override
+  public InfoProductDto toInfoProductDto(Product product) {
+    return null;
+  }
 
-    @Override
-    public List<InfoProductDto> toListInfoProductDto(List<Product> products) {
-        return null;
-    }
+  @Override
+  public List<InfoProductDto> toListInfoProductDto(List<Product> products) {
+      return null;
+  }
 
-    @Override
-    public Product merge(Product product, ProductDto productDto) {
-        return null;
-    }
+  @Override
+  public Product merge(Product product, ProductDto productDto) {
+      return null;
+  }
 }
