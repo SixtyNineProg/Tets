@@ -2,20 +2,25 @@ package ru.clevertec.product.mapper.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
+import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
-import util.ProductArgumentsProviderToProduct;
+import ru.clevertec.product.exception.ProductNotFoundException;
+import util.provider.ArgumentsProviderToInfoProductDto;
+import util.provider.ArgumentsProviderToProduct;
 
 class ProductMapperImplTest {
 
   private final ProductMapperImpl productMapper = new ProductMapperImpl();
 
   @ParameterizedTest
-  @ArgumentsSource(ProductArgumentsProviderToProduct.class)
-  void testToProduct(ProductDto productDto, Product expected) {
+  @ArgumentsSource(ArgumentsProviderToProduct.class)
+  void testToProduct_whenToProductProduct_thenProductDtoExpected(
+      ProductDto productDto, Product expected) {
     // Given
     // ProductDto and expected Product are provided by the MethodSource
 
@@ -30,8 +35,48 @@ class ProductMapperImplTest {
   }
 
   @Test
-  void testToInfoProductDto() {
-    assertThat(productMapper.toInfoProductDto(Product.builder().build())).isNull();
+  void testToProduct_whenToProductWithNullProductDto_thanProductNotFoundExceptionExpected() {
+    // given
+    ProductDto productDto = null;
+
+    // when
+    ProductNotFoundException thrown =
+        Assertions.assertThrows(
+            ProductNotFoundException.class, () -> productMapper.toProduct(productDto));
+    // then
+    assertThat(thrown).hasMessage(ProductNotFoundException.DEFAULT_MESSAGE);
+  }
+
+  @ParameterizedTest
+  @ArgumentsSource(ArgumentsProviderToInfoProductDto.class)
+  void testToInfoProductDto_whenToInfoProductDto_thenInfoProductDtoExpected(
+      Product product, InfoProductDto expected) {
+    // Given
+    // Product and expected InfoProductDto are provided by the MethodSource
+
+    // When
+    InfoProductDto actual = productMapper.toInfoProductDto(product);
+
+    // Then
+    assertThat(actual)
+        .hasFieldOrPropertyWithValue(InfoProductDto.Fields.uuid, expected.uuid())
+        .hasFieldOrPropertyWithValue(InfoProductDto.Fields.name, expected.name())
+        .hasFieldOrPropertyWithValue(InfoProductDto.Fields.description, expected.description())
+        .hasFieldOrPropertyWithValue(InfoProductDto.Fields.price, expected.price());
+  }
+
+  @Test
+  void
+      testToInfoProductDto_whenToInfoProductDtoWithNullProduct_thanProductNotFoundExceptionExpected() {
+    // given
+    Product product = null;
+
+    // when
+    ProductNotFoundException thrown =
+        Assertions.assertThrows(
+            ProductNotFoundException.class, () -> productMapper.toInfoProductDto(product));
+    // then
+    assertThat(thrown).hasMessage(ProductNotFoundException.DEFAULT_MESSAGE);
   }
 
   @Test

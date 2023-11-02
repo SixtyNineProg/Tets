@@ -1,11 +1,14 @@
 package ru.clevertec.product.data;
 
 import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.FieldNameConstants;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Builder
+@FieldNameConstants
 public record InfoProductDto(
 
     /** Идентификатор не может быть null */
