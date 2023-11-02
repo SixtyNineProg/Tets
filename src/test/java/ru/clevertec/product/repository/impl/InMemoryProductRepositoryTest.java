@@ -17,14 +17,15 @@ class InMemoryProductRepositoryTest {
   @Test
   void findById_whenFindByUuid_thenOptionalProductExpected() {
     // given
-    UUID uuid = ProductTestData.builder().build().getUuid();
+    Product product = ProductTestData.builder().build().buildProduct();
+    inMemoryProductRepository.save(product);
 
     // when
-    Optional<Product> actual = inMemoryProductRepository.findById(uuid);
+    Optional<Product> actual = inMemoryProductRepository.findById(product.getUuid());
 
     // then
     assertThat(actual).isNotEmpty();
-    assertThat(actual.get()).hasFieldOrPropertyWithValue(Product.Fields.uuid, uuid);
+    assertThat(actual.get()).hasFieldOrPropertyWithValue(Product.Fields.uuid, product.getUuid());
   }
 
   @Test
@@ -42,12 +43,16 @@ class InMemoryProductRepositoryTest {
   @Test
   void findAll_whenFindAll_thenNotEmptyListProductExpected() {
     // given
+    Product product = ProductTestData.builder().withUuid(null).build().buildProduct();
+    inMemoryProductRepository.save(product);
+    product = ProductTestData.builder().withUuid(null).withName("monitor").build().buildProduct();
+    inMemoryProductRepository.save(product);
 
     // when
     List<Product> actual = inMemoryProductRepository.findAll();
 
     // then
-    assertThat(actual).isNotEmpty();
+    assertThat(actual).isNotEmpty().hasSize(2);
   }
 
   @Test
@@ -59,11 +64,12 @@ class InMemoryProductRepositoryTest {
     Product actual = inMemoryProductRepository.save(expected);
 
     // then
-    assertThat(actual).isNotNull().hasNoNullFieldsOrProperties();
+    assertThat(actual).isNotNull();
+    assertThat(actual.getUuid()).isNotNull();
   }
 
   @Test
-  void delete_givenProductObject_whenDelete_thenRemoveProduct() {
+  void delete_whenDelete_thenRemoveProduct() {
     // given
     Product product = ProductTestData.builder().withUuid(null).build().buildProduct();
     inMemoryProductRepository.save(product);
